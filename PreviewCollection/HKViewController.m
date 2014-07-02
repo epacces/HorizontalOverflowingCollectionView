@@ -14,33 +14,36 @@
 @property (nonatomic, weak) IBOutlet UICollectionViewFlowLayout *layout;
 @property (nonatomic, weak) IBOutlet UIScrollView *hiddenScrollView;
 
+@property (nonatomic, assign) NSUInteger numberOfPages;
+@property (nonatomic, assign) CGFloat pageWidth;
+
 @end
 
-@implementation HKViewController {
-    NSUInteger _numberOfPages;
-}
+@implementation HKViewController
 
-- (void)awakeFromNib
-{
+#pragma mark -
+#pragma mark - View Controller Lifecycle 
+
+- (void)awakeFromNib {
     [super awakeFromNib];
-    _numberOfPages = 12;
+    self.numberOfPages = 12;
+    self.pageWidth = 290.f;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-//    [self.collectionView setContentInset:UIEdgeInsetsMake(0, (self.view.frame.size.width-pageSize)/2, 0, (self.view.frame.size.width-pageSize)/2)];
-    CGFloat pageSize = 290.f;
-    [self.hiddenScrollView setContentSize:CGSizeMake(pageSize * _numberOfPages, 568)];
+    [self.hiddenScrollView setContentSize:CGSizeMake(self.pageWidth * self.numberOfPages, CGRectGetHeight(self.view.bounds))];
     [self.collectionView.panGestureRecognizer setEnabled:NO];
     [self.collectionView addGestureRecognizer:self.hiddenScrollView.panGestureRecognizer];
-   
 }
 
+#pragma mark -
+#pragma mark - Collection View Delegate
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return _numberOfPages;
+    return self.numberOfPages;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -54,13 +57,23 @@
     return cell;
 }
 
-- (void) scrollViewDidScroll:(UIScrollView *)scrollView
+#pragma mark -
+#pragma mark - Scroll View Delegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     if (scrollView == self.hiddenScrollView) {
         CGPoint contentOffset = scrollView.contentOffset;
         contentOffset.x = contentOffset.x - self.collectionView.contentInset.left;
         self.collectionView.contentOffset = contentOffset;
     }
+}
+
+#pragma mark -
+#pragma mark - Layout hooks 
+
+- (void)viewWillLayoutSubviews {
+    [self.hiddenScrollView setContentSize:CGSizeMake(self.pageWidth * self.numberOfPages, CGRectGetHeight(self.view.bounds))];
 }
 
 @end
